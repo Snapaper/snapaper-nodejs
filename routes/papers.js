@@ -19,15 +19,20 @@ var c = new Crawler({
 });
 
 router.get('/:cate/:sub/:node', function (req, res, next) {
+  if (req.params.sub == 'Business Studies (9707)') {
+    var sub = 'Business%20Studies%20%20(9707)';
+  } else {
+    var sub = req.params.sub;
+  }
   if (req.params.node == 2) {
     var server = 'https://papers.gceguide.xyz';
     var uri_url = server;
   } else {
     var server = 'https://papers.gceguide.com';
-    var uri_url = server + '/' + req.params.cate + '/' + req.params.sub + '/';
+    var uri_url = server + '/' + req.params.cate + '/' + sub + '/';
   }
 
-  var uri = server + '/' + req.params.cate + '/' + req.params.sub;
+  var uri = server + '/' + req.params.cate + '/' + sub;
 
   console.log(uri)
   c.queue([{
@@ -45,6 +50,7 @@ router.get('/:cate/:sub/:node', function (req, res, next) {
         $("tr>td>a").each(function () {
           if ($(this).text() !== 'error_log') {
             const name = $(this).text();
+
             // key 字段
             key += 1;
 
@@ -84,6 +90,13 @@ router.get('/:cate/:sub/:node', function (req, res, next) {
               var type = 'Unknown'
             }
 
+            // year 字段
+            if (name.indexOf('List') > -1 || name.indexOf('-') > -1 || name.indexOf('_') == -1) {
+              var year = 0;
+            } else {
+              var year = name.split("_")[1].substr(1);
+            }
+
             returnArray.papers.push({
               'name': $(this).text(),
               'url': uri_url + $(this).attr('href'),
@@ -91,7 +104,8 @@ router.get('/:cate/:sub/:node', function (req, res, next) {
               'info': [
                 info
               ],
-              'type': type
+              'type': type,
+              'year': year
             });
           }
         });
