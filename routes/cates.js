@@ -20,7 +20,7 @@ var c = new Crawler({
 
 /* GET home page. */
 router.get('/:cate/:node', function (req, res, next) {
-  if (req.params.node == 2) {
+  if (parseInt(req.params.node) == 2) {
     var server = 'https://papers.gceguide.xyz/';
   } else {
     var server = 'https://papers.gceguide.com/';
@@ -36,13 +36,23 @@ router.get('/:cate/:node', function (req, res, next) {
           cates: new Array,
           count: 0
         };
-        $("tr>td>a").each(function () {
-          if ($(this).text() !== 'error_log') {
-            returnArray.cates.push({
-              'name': $(this).text()
-            });
-          }
-        });
+        if (parseInt(req.params.node) == 2) {
+          $("tr>td>a").each(function () {
+            if ($(this).text() !== 'error_log') {
+              returnArray.cates.push({
+                'name': $(this).text()
+              });
+            }
+          });
+        } else {
+          $(".dir>a").each(function () {
+            if ($(this).text() !== 'error_log') {
+              returnArray.cates.push({
+                'name': $(this).text()
+              });
+            }
+          });
+        }
         returnArray.count = returnArray.cates.length;
         console.log(server + req.params.cate)
         res.send(JSON.stringify(returnArray));
