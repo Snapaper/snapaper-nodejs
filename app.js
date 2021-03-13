@@ -7,7 +7,9 @@ var cors = require('cors')
 
 var indexRouter = require('./routes/index');
 var catesRouter = require('./routes/cates');
-var papersRouter = require('./routes/papers');
+var xyzPapersRouter = require('./routes/papers_gceguide_xyz');
+var comPapersRouter = require('./routes/papers_gceguide_com');
+var yearsRouter = require('./routes/years');
 
 var app = express();
 
@@ -18,20 +20,24 @@ app.set('view engine', 'jade');
 app.use(cors())
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 
 app.use('/api', indexRouter);
 app.use('/api/cates', catesRouter);
-app.use('/api/papers', papersRouter);
+app.use('/api/papers/xyz', xyzPapersRouter);
+app.use('/api/papers/com', comPapersRouter);
+app.use('/api/years', yearsRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
