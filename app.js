@@ -1,6 +1,5 @@
 var createError = require("http-errors");
 var express = require("express");
-var request = require("request");
 var path = require("path");
 var proxy = require("express-http-proxy");
 var cookieParser = require("cookie-parser");
