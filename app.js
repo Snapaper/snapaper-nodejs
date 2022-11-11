@@ -2,6 +2,7 @@ var createError = require("http-errors");
 var express = require("express");
 var request = require("request");
 var path = require("path");
+var proxy = require("express-http-proxy");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
@@ -40,23 +41,27 @@ app.use("/api/papers/xyz", xyzPapersRouter);
 app.use("/api/papers/com", comPapersRouter);
 app.use("/api/years", yearsRouter);
 
-// Delegate request for static files stored on Tencent Cloud server
-app.use("/case/cases", function (req, res) {
-	const cate = req.query["cate"];
-	const sub = req.query["sub"];
-
-	request.get(
-		`http://121.4.202.14/case/cases?cate=${cate}&sub=${sub}`,
-		{
-			rejectUnauthorized: false,
+// Delegate requests for directory listing of the Tencent Cloud server
+app.use(
+	"/case/cases",
+	proxy("http://121.4.202.14", {
+		proxyReqPathResolver: function (req) {
+			return `/case/cases?cate=${req.query["cate"]}&sub=${req.query["sub"]}`;
 		},
-		function (err, _res, body) {
-			if (!err) {
-				res.json(JSON.parse(body));
-			}
-		}
-	);
-});
+	})
+);
+
+// Delegate requests for static files stored the Tencent Cloud server
+app.use(
+	"/case/:cate/:sub/:paper",
+	proxy("http://121.4.202.14", {
+		proxyReqPathResolver: function (req) {
+			return `/case/${req.params.cate}/${req.params.sub}/${encodeURI(
+				req.params.paper
+			)}`;
+		},
+	})
+);
 
 // Catch 404 and forward to the error handler
 app.use(function (_req, _res, next) {
