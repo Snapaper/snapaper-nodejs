@@ -9,6 +9,7 @@ var indexRouter = require("./routes/index");
 var catesRouter = require("./routes/cates");
 var xyzPapersRouter = require("./routes/papers_gceguide_xyz");
 var comPapersRouter = require("./routes/papers_gceguide_com");
+var ppcoPapersRouter = require("./routes/pastpapers_co");
 var yearsRouter = require("./routes/years");
 
 var app = express();
@@ -37,6 +38,7 @@ app.use("/api", indexRouter);
 app.use("/api/cates", catesRouter);
 app.use("/api/papers/xyz", xyzPapersRouter);
 app.use("/api/papers/com", comPapersRouter);
+app.use("/api/papers/ppco", ppcoPapersRouter);
 app.use("/api/years", yearsRouter);
 
 // Catch 404 and forward to the error handler
