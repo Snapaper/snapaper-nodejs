@@ -4,7 +4,13 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
+var redisClient = require("./utils/redis_wrapper");
+var cache = require("apicache").options({
+	redisClient,
+	respectCacheControl: false,
+}).middleware;
 
+// Define routes
 var indexRouter = require("./routes/index");
 var catesRouter = require("./routes/cates");
 var xyzPapersRouter = require("./routes/papers_gceguide_xyz");
@@ -32,6 +38,7 @@ app.use(
 	})
 );
 app.use(cookieParser());
+app.use(cache("1 month"));
 
 // Define routes
 app.use("/api", indexRouter);
