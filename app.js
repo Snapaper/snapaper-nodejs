@@ -27,7 +27,7 @@ app.set("view engine", "jade");
 // Setup middleware
 app.use(
 	cors({
-		origin: [/snapaper\.com$/, "http://localhost:3000"],
+		origin: ["https://www.snapaper.com", "http://localhost:3000"],
 	})
 );
 app.use(logger("dev"));
