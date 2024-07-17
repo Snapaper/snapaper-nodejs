@@ -59,7 +59,7 @@ router.get("/ppco/:cate/:sub", function (req, res, _next) {
 
 /* GET paper years (GCEGuide.com Only) */
 router.get("/:cate/:sub", function (req, res, _next) {
-	const server = "https://papers.gceguide.com";
+	const server = "https://papers.gceguide.cc";
 
 	let sub = req.params.sub;
 	if (req.params.sub == "Business Studies (9707)") {

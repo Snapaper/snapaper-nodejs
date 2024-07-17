@@ -68,7 +68,7 @@ router.get("/:cate/:node", function (req, res, next) {
 	if (parseInt(req.params.node) == 2) {
 		var server = "https://papers.gceguide.xyz/";
 	} else {
-		var server = "https://papers.gceguide.com/";
+		var server = "https://papers.gceguide.cc/";
 	}
 	c.queue([
 		{

@@ -5,7 +5,8 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
 var redisClient = require("./utils/redis_wrapper");
-var cache = require("apicache").options({
+var apicache = require("apicache");
+var cache = apicache.options({
 	redisClient,
 	respectCacheControl: false,
 }).middleware;
@@ -51,6 +52,10 @@ app.use("/api/papers/xyz", xyzPapersRouter);
 app.use("/api/papers/com", comPapersRouter);
 app.use("/api/papers/ppco", ppcoPapersRouter);
 app.use("/api/years", yearsRouter);
+
+app.get("/api/cache/clear", (_req, res) => {
+	res.json(apicache.clear());
+});
 
 // Catch 404 and forward to the error handler
 app.use(function (_req, _res, next) {

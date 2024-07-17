@@ -25,7 +25,7 @@ router.get('/:cate/:sub/:year', function (req, res, next) {
     var sub = req.params.sub;
   }
   var year = req.params.year;
-  var server = 'https://papers.gceguide.com';
+  var server = 'https://papers.gceguide.cc';
   var uri_url = server + '/' + req.params.cate + '/' + sub + (year !== 'all' ? '/' + year : '') + '/';
 
   var uri = server + '/' + req.params.cate + '/' + sub + (year !== 'all' ? '/' + year : '');
