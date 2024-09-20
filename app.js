@@ -26,15 +26,24 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 // Setup middleware
+const allowedOrigins = [
+	"https://www.snapaper.com",
+	"https://snapaper.com",
+	"http://localhost:3000",
+];
 app.use(
 	cors({
-		origin: [
-			"https://www.snapaper.com",
-			"https://snapaper.com",
-			"http://localhost:3000",
-		],
+		origin: function (origin, callback) {
+			if (!origin) return callback(null, true);
+			if (allowedOrigins.indexOf(origin) === -1) {
+				var msg = "Access denied by CORS policies.";
+				return callback(new Error(msg), false);
+			}
+			return callback(null, true);
+		},
 	})
 );
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(

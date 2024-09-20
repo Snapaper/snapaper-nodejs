@@ -5,7 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "DEBUG=snapaper-nodejs:server yarn start"
+    "dev": "DEBUG=snapaper-nodejs:server yarn start",
+    "upgrade": "ncu -u -x crawler"
   },
   "dependencies": {
     "apicache": "^1.6.3",
