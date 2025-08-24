@@ -4,12 +4,12 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
-// var redisClient = require("./utils/redis_wrapper");
-// var apicache = require("apicache");
-// var cache = apicache.options({
-// 	redisClient,
-// 	respectCacheControl: false,
-// }).middleware;
+var redisClient = require("./utils/redis_wrapper");
+var apicache = require("apicache");
+var cache = apicache.options({
+	redisClient,
+	respectCacheControl: false,
+}).middleware;
 
 // Define routes
 var indexRouter = require("./routes/index");
@@ -53,7 +53,7 @@ app.use(
 	})
 );
 app.use(cookieParser());
-// app.use(cache("1 month"));
+app.use(cache("1 month"));
 
 // Define routes
 app.use("/api", indexRouter);
@@ -64,9 +64,9 @@ app.use("/api/papers/ppco", ppcoPapersRouter);
 app.use("/api/papers/ppca", ppcaPapersRouter);
 app.use("/api/years", yearsRouter);
 
-// app.get("/api/cache/clear", (_req, res) => {
-// 	res.json(apicache.clear());
-// });
+app.get("/api/cache/clear", (_req, res) => {
+	res.json(apicache.clear());
+});
 
 // Catch 404 and forward to the error handler
 app.use(function (_req, _res, next) {
