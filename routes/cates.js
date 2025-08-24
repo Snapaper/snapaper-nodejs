@@ -45,9 +45,47 @@ router.get("/ppco/:cate", function (req, res, next) {
 							const subjectName = subject
 								.substring(0, subject.lastIndexOf("-"))
 								.replaceAll("-", " ");
-							const subjectCode = subject.substring(
-								subject.lastIndexOf("-") + 1
-							);
+							const subjectCode = subject.substring(subject.lastIndexOf("-") + 1);
+							returnArray.cates.push({
+								name: `${subjectName} (${subjectCode})`,
+							});
+						}
+					});
+					returnArray.count = returnArray.cates.length;
+					console.log(server + req.params.cate);
+					res.send(JSON.stringify(returnArray));
+				}
+				done();
+			},
+		},
+	]);
+});
+
+// PapaCambridge
+// as-and-a-level
+// igcse
+router.get("/ppca/:cate", function (req, res, next) {
+	const server = "https://pastpapers.papacambridge.com/papers/caie/";
+	c.queue([
+		{
+			uri: `${server}${req.params.cate}`.toLowerCase(),
+			callback: function (error, resC, done) {
+				if (error) {
+					console.log(error);
+				} else {
+					let $ = resC.$;
+					let returnArray = {
+						cates: new Array(),
+						count: 0,
+					};
+					$("#datafile > div.files-list-main > div").each(function () {
+						const subject = $(this).text().trim();
+
+						if (subject.includes("-") && !subject.includes("No Content Available")) {
+							const subjectName = subject
+								.substring(0, subject.lastIndexOf("-"))
+								.replaceAll("-", " ");
+							const subjectCode = subject.substring(subject.lastIndexOf("-") + 2);
 							returnArray.cates.push({
 								name: `${subjectName} (${subjectCode})`,
 							});

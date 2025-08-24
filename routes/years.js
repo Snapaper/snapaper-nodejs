@@ -15,10 +15,7 @@ const no_dash_subjects = {
 };
 
 router.get("/ppco/:cate/:sub", function (req, res, _next) {
-	let sub = req.params.sub
-		.replace("(", "")
-		.replace(")", "")
-		.replaceAll(" ", "-");
+	let sub = req.params.sub.replace("(", "").replace(")", "").replaceAll(" ", "-");
 
 	if (no_dash_subjects[`${req.params.sub}`]) {
 		sub = no_dash_subjects[`${req.params.sub}`];
@@ -47,6 +44,48 @@ router.get("/ppco/:cate/:sub", function (req, res, _next) {
 								name: date,
 							});
 						}
+					});
+					returnArray.count = returnArray.years.length;
+					res.send(JSON.stringify(returnArray));
+				}
+				done();
+			},
+		},
+	]);
+});
+
+router.get("/ppca/:cate/:sub", function (req, res, _next) {
+	let sub = req.params.sub.replace("(", "").replace(")", "").replaceAll(" ", "-");
+
+	if (no_dash_subjects[`${req.params.sub}`]) {
+		sub = no_dash_subjects[`${req.params.sub}`];
+	}
+
+	const server = "https://pastpapers.papacambridge.com/papers/caie/";
+	const uri = `${server}${req.params.cate}-${sub}`;
+
+	crawler.queue([
+		{
+			uri: uri.toLowerCase(),
+			callback: function (error, resC, done) {
+				if (error) {
+					console.log(error);
+				} else {
+					let $ = resC.$;
+					let returnArray = {
+						years: new Array(),
+						count: 0,
+					};
+					$("#datafile > div.files-list-main > div > a > div").each(function () {
+						const date = $(this).text().trim().replaceAll(" ", "-");
+
+						if (date.includes("Topical")) {
+							return;
+						}
+
+						returnArray.years.push({
+							name: date,
+						});
 					});
 					returnArray.count = returnArray.years.length;
 					res.send(JSON.stringify(returnArray));

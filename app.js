@@ -4,12 +4,12 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
-var redisClient = require("./utils/redis_wrapper");
-var apicache = require("apicache");
-var cache = apicache.options({
-	redisClient,
-	respectCacheControl: false,
-}).middleware;
+// var redisClient = require("./utils/redis_wrapper");
+// var apicache = require("apicache");
+// var cache = apicache.options({
+// 	redisClient,
+// 	respectCacheControl: false,
+// }).middleware;
 
 // Define routes
 var indexRouter = require("./routes/index");
@@ -17,6 +17,7 @@ var catesRouter = require("./routes/cates");
 var xyzPapersRouter = require("./routes/papers_gceguide_xyz");
 var comPapersRouter = require("./routes/papers_gceguide_com");
 var ppcoPapersRouter = require("./routes/pastpapers_co");
+var ppcaPapersRouter = require("./routes/papacambridge_com");
 var yearsRouter = require("./routes/years");
 
 var app = express();
@@ -52,7 +53,7 @@ app.use(
 	})
 );
 app.use(cookieParser());
-app.use(cache("1 month"));
+// app.use(cache("1 month"));
 
 // Define routes
 app.use("/api", indexRouter);
@@ -60,11 +61,12 @@ app.use("/api/cates", catesRouter);
 app.use("/api/papers/xyz", xyzPapersRouter);
 app.use("/api/papers/com", comPapersRouter);
 app.use("/api/papers/ppco", ppcoPapersRouter);
+app.use("/api/papers/ppca", ppcaPapersRouter);
 app.use("/api/years", yearsRouter);
 
-app.get("/api/cache/clear", (_req, res) => {
-	res.json(apicache.clear());
-});
+// app.get("/api/cache/clear", (_req, res) => {
+// 	res.json(apicache.clear());
+// });
 
 // Catch 404 and forward to the error handler
 app.use(function (_req, _res, next) {
