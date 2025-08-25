@@ -1,14 +1,20 @@
+// Load environment variables
+require("dotenv").config();
+
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var cors = require("cors");
+var { corsOptions } = require("./config/cors.config");
 var redisClient = require("./utils/redis_wrapper");
 var apicache = require("apicache");
 var cache = apicache.options({
 	redisClient,
 	respectCacheControl: false,
+	// Add origin to cache key to avoid CORS issues with cached responses
+	appendKey: (req, res) => req.headers.origin || "",
 }).middleware;
 
 // Define routes
@@ -27,23 +33,25 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 // Setup middleware
-const allowedOrigins = [
-	"https://www.snapaper.com",
-	"https://snapaper.com",
-	"http://localhost:3000",
-];
-app.use(
-	cors({
-		origin: function (origin, callback) {
-			if (!origin) return callback(null, true);
-			if (allowedOrigins.indexOf(origin) === -1) {
-				var msg = "Access denied by CORS policies.";
-				return callback(new Error(msg), false);
-			}
-			return callback(null, true);
-		},
-	})
-);
+// Apply CORS middleware with configuration from config file
+app.use(cors(corsOptions));
+
+// Custom middleware to handle CORS errors and provide debugging
+app.use((req, res, next) => {
+	// Log CORS requests in development
+	if (process.env.NODE_ENV !== "production" && req.headers.origin) {
+		console.log(
+			`CORS Request from origin: ${req.headers.origin} to ${req.method} ${req.path}`
+		);
+	}
+
+	// Handle preflight requests that weren't caught by cors middleware
+	if (req.method === "OPTIONS") {
+		return res.sendStatus(200);
+	}
+
+	next();
+});
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -79,7 +87,28 @@ app.use(function (err, req, res, _next) {
 	res.locals.message = err.message;
 	res.locals.error = req.app.get("env") === "development" ? err : {};
 
-	// Render the error page
+	// Check if this is a CORS error
+	if (err && err.message && err.message.includes("CORS")) {
+		return res.status(403).json({
+			error: "CORS Policy Error",
+			message:
+				process.env.NODE_ENV === "production"
+					? "Access denied by CORS policy"
+					: err.message,
+			origin: req.headers.origin || "not provided",
+		});
+	}
+
+	// Handle JSON responses for API routes
+	if (req.path.startsWith("/api")) {
+		return res.status(err.status || 500).json({
+			error: err.message || "Internal Server Error",
+			status: err.status || 500,
+			...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+		});
+	}
+
+	// Render the error page for non-API routes
 	res.status(err.status || 500);
 	res.render("error");
 });
