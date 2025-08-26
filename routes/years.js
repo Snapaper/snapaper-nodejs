@@ -79,7 +79,7 @@ router.get("/ppca/:cate/:sub", function (req, res, _next) {
 					$("#datafile > div.files-list-main > div > a > div").each(function () {
 						const date = $(this).text().trim().replaceAll(" ", "-");
 
-						if (date.includes("Topical")) {
+						if (date.includes("Topical") || date.includes("Solved")) {
 							return;
 						}
 
