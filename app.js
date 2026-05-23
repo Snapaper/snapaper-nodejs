@@ -33,6 +33,12 @@ var downloadRouter = require("./routes/download");
 
 var app = express();
 
+// Trust Fly.io's edge proxy so req.protocol reflects X-Forwarded-Proto.
+// Without this the paper-list endpoint builds http:// download URLs even
+// when the original request was https, triggering mixed-content blocks
+// when the frontend (https) renders the link.
+app.set("trust proxy", true);
+
 // Setup views
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
