@@ -15,6 +15,10 @@ var cache = apicache.options({
 	respectCacheControl: false,
 	// Add origin to cache key to avoid CORS issues with cached responses
 	appendKey: (req, res) => req.headers.origin || "",
+	// Only cache successful responses. Excludes error statuses (a transient
+	// upstream failure would otherwise poison the 1-month TTL) and redirects
+	// from /api/download (their tokenized target URL expires in minutes).
+	statusCodes: { include: [200] },
 }).middleware;
 
 // Define routes
@@ -25,6 +29,7 @@ var comPapersRouter = require("./routes/papers_gceguide_com");
 var ppcoPapersRouter = require("./routes/pastpapers_co");
 var ppcaPapersRouter = require("./routes/papacambridge_com");
 var yearsRouter = require("./routes/years");
+var downloadRouter = require("./routes/download");
 
 var app = express();
 
@@ -61,7 +66,9 @@ app.use(
 	})
 );
 app.use(cookieParser());
-app.use(cache("1 month"));
+// Skip cache for /api/download — it streams multi-MB binaries and uses a
+// per-request tokenized upstream URL, neither of which belongs in apicache.
+app.use(cache("1 month", (req) => !req.originalUrl.startsWith("/api/download")));
 
 // Define routes
 app.use("/api", indexRouter);
@@ -71,6 +78,7 @@ app.use("/api/papers/com", comPapersRouter);
 app.use("/api/papers/ppco", ppcoPapersRouter);
 app.use("/api/papers/ppca", ppcaPapersRouter);
 app.use("/api/years", yearsRouter);
+app.use("/api/download", downloadRouter);
 
 app.get("/api/cache/clear", (_req, res) => {
 	res.json(apicache.clear());

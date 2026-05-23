@@ -7,9 +7,14 @@ var redisClient = redis
 	})
 	.on("connect", function () {
 		console.log("Redis connected!");
+	})
+	.on("error", function (err) {
+		console.warn("Redis error (caching disabled):", err.message);
 	});
 
-redisClient.connect();
+redisClient.connect().catch(function (err) {
+	console.warn("Redis connect failed (caching disabled):", err.message);
+});
 
 var redisWrapper = {
 	connected: redisClient.isOpen,
