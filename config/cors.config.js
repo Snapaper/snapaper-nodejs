@@ -83,11 +83,16 @@ const corsOptions = {
 		"X-Request-Id",
 	],
 
-	// Headers exposed to the client
+	// Headers exposed to the client. Content-Disposition and Content-Length
+	// matter for /api/download — frontends use them to read the filename
+	// (for `<a download>` or File System Access) and show progress.
 	exposedHeaders: [
 		"X-Total-Count",
 		"X-Page-Count",
+		"Content-Disposition",
+		"Content-Length",
 		"Content-Range",
+		"Accept-Ranges",
 		"X-Request-Id",
 		"X-Response-Time",
 		"X-Rate-Limit-Remaining",

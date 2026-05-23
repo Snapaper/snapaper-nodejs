@@ -1,6 +1,7 @@
 var Crawler = require("crawler");
 var express = require("express");
 var router = express.Router();
+var { fetchCates } = require("../utils/papersdaddy_wrapper");
 /*
 const Agent = require('socks5-https-client/lib/Agent');
 */
@@ -61,44 +62,14 @@ router.get("/ppco/:cate", function (req, res, next) {
 	]);
 });
 
-// PapaCambridge
-// as-and-a-level
-// igcse
-router.get("/ppca/:cate", function (req, res, next) {
-	const server = "https://pastpapers.papacambridge.com/papers/caie/";
-	c.queue([
-		{
-			uri: `${server}${req.params.cate}`.toLowerCase(),
-			callback: function (error, resC, done) {
-				if (error) {
-					console.log(error);
-				} else {
-					let $ = resC.$;
-					let returnArray = {
-						cates: new Array(),
-						count: 0,
-					};
-					$("#datafile > div.files-list-main > div").each(function () {
-						const subject = $(this).text().trim();
-
-						if (subject.includes("-") && !subject.includes("No Content Available")) {
-							const subjectName = subject
-								.substring(0, subject.lastIndexOf("-"))
-								.replaceAll("-", " ");
-							const subjectCode = subject.substring(subject.lastIndexOf("-") + 2);
-							returnArray.cates.push({
-								name: `${subjectName} (${subjectCode})`,
-							});
-						}
-					});
-					returnArray.count = returnArray.cates.length;
-					console.log(server + req.params.cate);
-					res.send(JSON.stringify(returnArray));
-				}
-				done();
-			},
-		},
-	]);
+router.get("/ppca/:cate", function (req, res, _next) {
+	fetchCates(req.params.cate, function (err, cates) {
+		if (err) {
+			console.log(err);
+			return res.status(502).json({ cates: [], count: 0, error: err.message });
+		}
+		res.json({ cates, count: cates.length });
+	});
 });
 
 // GCE Guide
