@@ -11,6 +11,9 @@ const STREAM_HEADERS = {
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
 	Accept: "*/*",
 };
+if (process.env.PROXY_SECRET) {
+	STREAM_HEADERS.Authorization = `Bearer ${process.env.PROXY_SECRET}`;
+}
 
 const CONTENT_TYPE_BY_EXT = {
 	pdf: "application/pdf",

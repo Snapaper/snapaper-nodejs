@@ -1,0 +1,10 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "snapaper-papersdaddy-proxy",
+	"main": "src/index.js",
+	"compatibility_date": "2026-05-24",
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 0.1
+	}
+}
