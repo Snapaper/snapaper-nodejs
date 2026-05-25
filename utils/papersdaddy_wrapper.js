@@ -1,19 +1,27 @@
 var Crawler = require("crawler");
 
+// SERVER is the host that crawler hits. When PROXY_BASE is set we go through
+// the Cloudflare Worker proxy that fronts papersdaddy — that's required in
+// production because Fly's egress IPs get 429'd by Cloudflare. Locally, fall
+// back to direct papersdaddy so dev works without the proxy.
+const SERVER = process.env.PROXY_BASE || "https://www.papersdaddy.com";
+const PROXY_SECRET = process.env.PROXY_SECRET || "";
+
+const defaultHeaders = {
+	Accept:
+		"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+	"Accept-Language": "en-US,en;q=0.5",
+};
+if (PROXY_SECRET) defaultHeaders.Authorization = `Bearer ${PROXY_SECRET}`;
+
 var crawler = new Crawler({
 	skipEventRequest: false,
 	maxConnections: 30,
 	method: "GET",
 	userAgent:
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-	headers: {
-		Accept:
-			"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-		"Accept-Language": "en-US,en;q=0.5",
-	},
+	headers: defaultHeaders,
 });
-
-const SERVER = "https://www.papersdaddy.com";
 
 const LEVEL_MAP = {
 	"as-and-a-level": "a-level",
@@ -23,10 +31,25 @@ const LEVEL_MAP = {
 	"o-level": "o-level",
 };
 
+// Papersdaddy uses descriptive padding on a few Cambridge slugs (e.g. 9618 is
+// "computer-science-for-first-examination-in-2021-9618"). The cates fetch
+// preserves whatever display name papersdaddy renders, but the frontend may
+// also pass Cambridge's canonical display name ("Computer Science (9618)") —
+// in which case the canonical slug 404s. Keyed by subject code so the override
+// works regardless of which display-name variant arrives.
+const SLUG_OVERRIDES_BY_CODE = {
+	"9618": "computer-science-for-first-examination-in-2021-9618",
+};
+
 function toSubjectSlug(sub) {
+	const codeMatch = /\((\d{4,5})\)\s*$/.exec(sub);
+	if (codeMatch && SLUG_OVERRIDES_BY_CODE[codeMatch[1]]) {
+		return SLUG_OVERRIDES_BY_CODE[codeMatch[1]];
+	}
 	return sub
 		.replace(/&/g, "and")
 		.replace(/[()]/g, "")
+		.replace(/\s+/g, "-")
 		.replace(/-+/g, "-")
 		.replace(/^-|-$/g, "")
 		.toLowerCase();
